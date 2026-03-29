@@ -7,11 +7,15 @@ export default function KYCPanel() {
     const [participants, setParticipants] = useState(PARTICIPANTS);
     const [showAdd, setShowAdd] = useState(false);
     const [filter, setFilter] = useState('all');
+    const [search, setSearch] = useState('');
     const [selected, setSelected] = useState(null);
     const [form, setForm] = useState({ name: '', wallet: '', role: 'Institutional', kyc: 'KYC-3' });
     const [adding, setAdding] = useState(false);
 
-    const filtered = filter === 'all' ? participants : participants.filter(p => p.status === filter);
+    const searchLower = search.toLowerCase();
+    const filtered = participants
+        .filter(p => filter === 'all' || p.status === filter)
+        .filter(p => !searchLower || (p.name ?? '').toLowerCase().includes(searchLower) || (p.wallet ?? '').toLowerCase().includes(searchLower));
 
     const handleAdd = async () => {
         setAdding(true);
@@ -33,6 +37,15 @@ export default function KYCPanel() {
                             <button className="btn btn-secondary btn-sm">📥 Import CSV</button>
                             <button className="btn btn-primary" onClick={() => setShowAdd(true)}>+ Add Participant</button>
                         </div>
+                    </div>
+                    <div style={{ marginBottom: 12 }}>
+                        <input
+                            className="form-input"
+                            placeholder="🔍 Find account by name or wallet…"
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                            style={{ width: '100%', boxSizing: 'border-box' }}
+                        />
                     </div>
                     <div style={{ display: 'flex', gap: 6, marginBottom: 14, flexWrap: 'wrap' }}>
                         {Object.entries(counts).map(([key, count]) => (
@@ -66,6 +79,9 @@ export default function KYCPanel() {
                                         </td>
                                     </tr>
                                 ))}
+                                {filtered.length === 0 && (
+                                    <tr><td colSpan={5} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '24px 0', fontSize: 13 }}>No accounts found.</td></tr>
+                                )}
                             </tbody>
                         </table>
                     </div>
